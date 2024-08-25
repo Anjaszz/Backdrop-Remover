@@ -7,15 +7,16 @@ import ErrorModal from "../components/ErrorModal";
 
 const Home = () => {
   const [image, setImage] = useState(null);
-  const [fileName, setFileName] = useState(""); // State untuk nama file
+  const [fileName, setFileName] = useState(""); 
   const [isLoading, setIsLoading] = useState(false);
   const [resultBlob, setResultBlob] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const apiKey = import.meta.env.VITE_API_KEY;
 
   const imgUpload = (e) => {
     const img = e.target.files[0];
     setImage(img);
-    setFileName(img.name); // Update state nama file
+    setFileName(img.name); 
   };
 
   const uploadImage = async () => {
@@ -34,7 +35,7 @@ const Home = () => {
       const response = await fetch("https://api.remove.bg/v1.0/removebg", {
         method: "POST",
         headers: {
-          "X-Api-Key": "CL1yfBdnwDHWYjKFzdZNWQsv",
+          "X-Api-Key": apiKey,
         },
         body: formData,
       });
