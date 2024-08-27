@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import loadImage from "blueimp-load-image";
 import UploadSection from "../components/UploadSection";
@@ -7,16 +6,17 @@ import ErrorModal from "../components/ErrorModal";
 
 const Home = () => {
   const [image, setImage] = useState(null);
-  const [fileName, setFileName] = useState(""); 
+  const [fileName, setFileName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [resultBlob, setResultBlob] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [selectedColor, setSelectedColor] = useState("#ffffff"); // Default background color
   const apiKey = import.meta.env.VITE_API_KEY;
 
   const imgUpload = (e) => {
     const img = e.target.files[0];
     setImage(img);
-    setFileName(img.name); 
+    setFileName(img.name);
   };
 
   const uploadImage = async () => {
@@ -42,31 +42,51 @@ const Home = () => {
 
       if (response.status === 200) {
         const outputBlob = await response.blob();
-        setResultBlob(URL.createObjectURL(outputBlob));
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        const img = new Image();
+        img.src = URL.createObjectURL(outputBlob);
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.fillStyle = selectedColor; // Set the selected color as the background
+          ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill the canvas with color
+          ctx.drawImage(img, 0, 0); // Draw the image over the colored background
+
+          canvas.toBlob((blob) => {
+            setResultBlob(URL.createObjectURL(blob));
+            setIsLoading(false);
+          });
+        };
       } else {
         setShowModal(true);
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     });
   };
 
   const handleDownload = () => {
-    // Hapus hasil, nama file, dan set image menjadi null setelah download
     setResultBlob(null);
     setImage(null);
-    setFileName(""); // Reset nama file
+    setFileName("");
   };
 
   return (
     <div className="flex flex-wrap justify-center py-8 px-4">
-     
-      <ResultSection resultBlob={resultBlob} isLoading={isLoading} onDownload={handleDownload} />
-      <UploadSection imgUpload={imgUpload} uploadImage={uploadImage} image={image} isLoading={isLoading} fileName={fileName} />
+      <ResultSection resultBlob={resultBlob} isLoading={isLoading} onDownload={handleDownload} fileName={fileName} />
+      <UploadSection
+        imgUpload={imgUpload}
+        uploadImage={uploadImage}
+        image={image}
+        isLoading={isLoading}
+        fileName={fileName}
+        selectedColor={selectedColor}
+        setSelectedColor={setSelectedColor}
+      />
       <ErrorModal showModal={showModal} onClose={() => setShowModal(false)} />
     </div>
   );
 };
-
 
 export default Home;

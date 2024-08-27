@@ -1,6 +1,12 @@
 /* eslint-disable react/prop-types */
 
-const ResultSection = ({ resultBlob, isLoading, onDownload }) => {
+const ResultSection = ({ resultBlob, isLoading, onDownload, fileName }) => {
+  const getModifiedFileName = () => {
+    const fileParts = fileName.split(".");
+    const baseName = fileParts.join("."); // Menggabungkan kembali nama file tanpa ekstensi
+    return `${baseName}(remove).png`; // Mengembalikan nama file dengan penambahan (remove)
+  };
+
   return (
     <div className="w-full md:w-1/2 px-4">
       <div className="text-center">
@@ -29,9 +35,9 @@ const ResultSection = ({ resultBlob, isLoading, onDownload }) => {
           <a
             id="down"
             href={resultBlob}
-            download="result.png"
+            download={getModifiedFileName()} // Menggunakan nama file yang telah dimodifikasi
             className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-            onClick={onDownload} // Tambahkan onClick handler
+            onClick={onDownload}
           >
             Download
           </a>
