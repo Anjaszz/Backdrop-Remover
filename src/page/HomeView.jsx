@@ -73,17 +73,28 @@ const Home = () => {
   };
 
   return (
-    <div className="flex flex-wrap justify-center py-8 px-4">
-      <ResultSection resultBlob={resultBlob} isLoading={isLoading} onDownload={handleDownload} fileName={fileName} />
-      <UploadSection
-        imgUpload={imgUpload}
-        uploadImage={uploadImage}
-        image={image}
-        isLoading={isLoading}
-        fileName={fileName}
-        selectedColor={selectedColor}
-        setSelectedColor={setSelectedColor}
-      />
+    <div className="w-full max-w-7xl mx-auto px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="order-2 lg:order-1">
+          <UploadSection
+            imgUpload={imgUpload}
+            uploadImage={uploadImage}
+            image={image}
+            isLoading={isLoading}
+            fileName={fileName}
+            selectedColor={selectedColor}
+            setSelectedColor={setSelectedColor}
+          />
+        </div>
+        <div className="order-1 lg:order-2">
+          <ResultSection 
+            resultBlob={resultBlob} 
+            isLoading={isLoading} 
+            onDownload={handleDownload} 
+            fileName={fileName} 
+          />
+        </div>
+      </div>
       <ErrorModal showModal={showModal} onClose={() => setShowModal(false)} />
     </div>
   );

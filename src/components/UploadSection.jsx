@@ -1,48 +1,166 @@
 /* eslint-disable react/prop-types */
+import { useState, useRef } from 'react';
 
 const UploadSection = ({ imgUpload, uploadImage, image, isLoading, fileName, selectedColor, setSelectedColor }) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
+        imgUpload({ target: { files: [file] } });
+        const reader = new FileReader();
+        reader.onload = (e) => setImagePreview(e.target.result);
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    imgUpload(e);
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => setImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const predefinedColors = [
+    '#ffffff', '#000000', '#ff0000', '#00ff00', '#0000ff', 
+    '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#800080'
+  ];
+
   return (
-    <div className="w-full md:w-1/2 px-4">
-      <div className="text-center">
-        <div className="mt-4 p-4 bg-white shadow-lg rounded-lg">
+    <div className="w-full">
+      <div className="glass-effect rounded-2xl p-8 hover-scale">
+        <h2 className="text-2xl font-bold text-white mb-6 text-center">
+          Upload Gambar
+        </h2>
+        
+        <div
+          className={`drag-area rounded-2xl p-8 min-h-[300px] flex flex-col items-center justify-center transition-all duration-300 ${
+            isDragging ? 'drag-over' : ''
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           <input
+            ref={fileInputRef}
             id="upload"
             type="file"
-            onChange={imgUpload}
+            accept="image/*"
+            onChange={handleFileSelect}
             className="hidden"
           />
-          <label
-            htmlFor="upload"
-            className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg top-4"
-          >
-            Upload
-          </label>
-          <label
-            id="upload-label"
-            htmlFor="upload"
-            className="block text-sm text-gray-600 mt-3"
-          >
-            {fileName ? `File name: ${fileName}` : "Pilih file"} {/* Menampilkan nama file */}
-          </label>
+          
+          {imagePreview ? (
+            <div className="text-center">
+              <img 
+                src={imagePreview} 
+                alt="Preview" 
+                className="image-preview mb-4 mx-auto"
+              />
+              <p className="text-white/80 text-sm mb-4">{fileName}</p>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="btn-secondary mr-2"
+              >
+                Ganti Gambar
+              </button>
+            </div>
+          ) : (
+            <div className="text-center">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-white/10 flex items-center justify-center">
+                <svg className="w-10 h-10 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Drag & Drop gambar di sini
+              </h3>
+              <p className="text-white/60 mb-6">atau klik untuk memilih file</p>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="btn-primary"
+              >
+                Pilih Gambar
+              </button>
+              <p className="text-white/40 text-sm mt-4">
+                Format: JPG, PNG, WEBP (Max 10MB)
+              </p>
+            </div>
+          )}
         </div>
-        
-        <div className="mt-4">
-          <p className="text-gray-500">Pilih warna background baru:</p>
-          <input
-            type="color"
-            value={selectedColor}
-            onChange={(e) => setSelectedColor(e.target.value)}
-            className="mt-2"
-          />
-        </div>
-        
-        <button
-          className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
-          onClick={uploadImage}
-          disabled={!image || isLoading}
-        >
-          {isLoading ? "Menghapus..." : "Hapus Background"}
-        </button>
+
+        {image && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-white mb-4 text-center">
+              Pilih Warna Background
+            </h3>
+            
+            <div className="flex flex-wrap gap-3 justify-center mb-4">
+              {predefinedColors.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => setSelectedColor(color)}
+                  className={`w-12 h-12 rounded-full border-3 transition-all duration-300 hover:scale-110 ${
+                    selectedColor === color 
+                      ? 'border-white ring-4 ring-white/30' 
+                      : 'border-white/30 hover:border-white/60'
+                  }`}
+                  style={{ backgroundColor: color }}
+                  title={color}
+                />
+              ))}
+            </div>
+
+            <div className="flex justify-center mb-6">
+              <div className="flex items-center space-x-3">
+                <span className="text-white/80 text-sm">Custom:</span>
+                <input
+                  type="color"
+                  value={selectedColor}
+                  onChange={(e) => setSelectedColor(e.target.value)}
+                  className="color-picker"
+                />
+              </div>
+            </div>
+
+            <div className="text-center">
+              <button
+                className={`btn-accent px-8 py-4 text-lg font-semibold ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={uploadImage}
+                disabled={!image || isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className="loading-spinner w-5 h-5"></div>
+                    <span>Memproses...</span>
+                  </div>
+                ) : (
+                  <span>🚀 Hapus Background</span>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
