@@ -11,6 +11,7 @@ const Home = () => {
   const [resultBlob, setResultBlob] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedColor, setSelectedColor] = useState("#ffffff"); // Default background color
+  const [addBackground, setAddBackground] = useState(false); // Toggle for adding background
   const apiKey = import.meta.env.VITE_API_KEY;
 
   const imgUpload = (e) => {
@@ -42,23 +43,31 @@ const Home = () => {
 
       if (response.status === 200) {
         const outputBlob = await response.blob();
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
 
-        const img = new Image();
-        img.src = URL.createObjectURL(outputBlob);
-        img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.fillStyle = selectedColor; // Set the selected color as the background
-          ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill the canvas with color
-          ctx.drawImage(img, 0, 0); // Draw the image over the colored background
+        if (addBackground) {
+          // Add colored background if option is enabled
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
 
-          canvas.toBlob((blob) => {
-            setResultBlob(URL.createObjectURL(blob));
-            setIsLoading(false);
-          });
-        };
+          const img = new Image();
+          img.src = URL.createObjectURL(outputBlob);
+          img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.fillStyle = selectedColor; // Set the selected color as the background
+            ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill the canvas with color
+            ctx.drawImage(img, 0, 0); // Draw the image over the colored background
+
+            canvas.toBlob((blob) => {
+              setResultBlob(URL.createObjectURL(blob));
+              setIsLoading(false);
+            });
+          };
+        } else {
+          // Just use the transparent background image directly
+          setResultBlob(URL.createObjectURL(outputBlob));
+          setIsLoading(false);
+        }
       } else {
         setShowModal(true);
         setIsLoading(false);
@@ -84,6 +93,8 @@ const Home = () => {
             fileName={fileName}
             selectedColor={selectedColor}
             setSelectedColor={setSelectedColor}
+            addBackground={addBackground}
+            setAddBackground={setAddBackground}
           />
         </div>
         <div className="order-1 lg:order-2">

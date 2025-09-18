@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef } from 'react';
 
-const UploadSection = ({ imgUpload, uploadImage, image, isLoading, fileName, selectedColor, setSelectedColor }) => {
+const UploadSection = ({ imgUpload, uploadImage, image, isLoading, fileName, selectedColor, setSelectedColor, addBackground, setAddBackground }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
@@ -111,39 +111,7 @@ const UploadSection = ({ imgUpload, uploadImage, image, isLoading, fileName, sel
 
         {image && (
           <div className="mt-8">
-            <h3 className="text-lg font-semibold text-white mb-4 text-center">
-              Pilih Warna Background
-            </h3>
-            
-            <div className="flex flex-wrap gap-3 justify-center mb-4">
-              {predefinedColors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={`w-12 h-12 rounded-full border-3 transition-all duration-300 hover:scale-110 ${
-                    selectedColor === color 
-                      ? 'border-white ring-4 ring-white/30' 
-                      : 'border-white/30 hover:border-white/60'
-                  }`}
-                  style={{ backgroundColor: color }}
-                  title={color}
-                />
-              ))}
-            </div>
-
-            <div className="flex justify-center mb-6">
-              <div className="flex items-center space-x-3">
-                <span className="text-white/80 text-sm">Custom:</span>
-                <input
-                  type="color"
-                  value={selectedColor}
-                  onChange={(e) => setSelectedColor(e.target.value)}
-                  className="color-picker"
-                />
-              </div>
-            </div>
-
-            <div className="text-center">
+            <div className="text-center mb-6">
               <button
                 className={`btn-accent px-8 py-4 text-lg font-semibold ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={uploadImage}
@@ -158,6 +126,61 @@ const UploadSection = ({ imgUpload, uploadImage, image, isLoading, fileName, sel
                   <span>🚀 Hapus Background</span>
                 )}
               </button>
+            </div>
+
+            <div className="border-t border-white/20 pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">
+                  Tambah Warna Background (Opsional)
+                </h3>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={addBackground}
+                    onChange={(e) => setAddBackground(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+
+              {addBackground && (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    {predefinedColors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-12 h-12 rounded-full border-3 transition-all duration-300 hover:scale-110 ${
+                          selectedColor === color
+                            ? 'border-white ring-4 ring-white/30'
+                            : 'border-white/30 hover:border-white/60'
+                        }`}
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex justify-center">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-white/80 text-sm">Custom:</span>
+                      <input
+                        type="color"
+                        value={selectedColor}
+                        onChange={(e) => setSelectedColor(e.target.value)}
+                        className="color-picker"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!addBackground && (
+                <p className="text-white/60 text-sm text-center">
+                  Background akan transparan (PNG dengan alpha channel)
+                </p>
+              )}
             </div>
           </div>
         )}
